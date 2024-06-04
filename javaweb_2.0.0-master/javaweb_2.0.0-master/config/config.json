@@ -1,0 +1,10 @@
+{
+    "development": {
+      "username": "root",
+      "password": "chtw2001",
+      "database": "javaweb",
+      "host": "127.0.0.1",
+      "dialect": "mysql",
+      "logging": false
+    }
+}
