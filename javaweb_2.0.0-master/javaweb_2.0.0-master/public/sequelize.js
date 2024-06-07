@@ -194,25 +194,47 @@ let minData = [];
 let maxData = [];
 let avgData = [];
 
-const btnline = document.getElementById('line');
-const btnbar = document.getElementById('bar');
-const btnpolarArea = document.getElementById('polarArea');
+const btnLine = document.getElementById('line');
+const btnBar = document.getElementById('bar');
+const btnPolarArea = document.getElementById('polarArea');
+const btnRadar = document.getElementById('radar'); 
 
-btnline.addEventListener('click', function () { 
+btnLine.addEventListener('click', function () {
     chart_type = 'line';
-    btnline.className="btn btn-secondary"; btnbar.className="btn btn-primary"; btnpolarArea.className="btn btn-primary";
-    if(fileName.length!=0) updateChart(null,null);
-})
-btnbar.addEventListener('click', function () {
-    chart_type = 'bar';
-    btnline.className="btn btn-primary"; btnbar.className="btn btn-secondary"; btnpolarArea.className="btn btn-primary";
+    btnLine.classList.add('btn-secondary'); 
+    btnBar.classList.remove('btn-secondary'); 
+    btnPolarArea.classList.remove('btn-secondary'); 
+    btnRadar.classList.remove('btn-secondary');
     if(fileName.length!=0) updateChart(null,null);
 });
-btnpolarArea.addEventListener('click', function () {
-    chart_type = 'polarArea';
-    btnline.className="btn btn-primary"; btnbar.className="btn btn-primary"; btnpolarArea.className="btn btn-secondary";
+
+
+btnBar.addEventListener('click', function () {
+    chart_type = 'bar';
+    btnLine.classList.remove('btn-secondary'); 
+    btnBar.classList.add('btn-secondary'); 
+    btnPolarArea.classList.remove('btn-secondary'); 
+    btnRadar.classList.remove('btn-secondary');
     if(fileName.length!=0) updateChart(null,null);
- });
+});
+
+btnPolarArea.addEventListener('click', function () {
+    chart_type = 'polarArea';
+    btnLine.classList.remove('btn-secondary'); 
+    btnBar.classList.remove('btn-secondary'); 
+    btnPolarArea.classList.add('btn-secondary'); 
+    btnRadar.classList.remove('btn-secondary');
+    if(fileName.length!=0) updateChart(null,null);
+});
+
+btnRadar.addEventListener('click', function () {
+    chart_type = 'radar'; 
+    btnLine.classList.remove('btn-secondary'); 
+    btnBar.classList.remove('btn-secondary'); 
+    btnPolarArea.classList.remove('btn-secondary'); 
+    btnRadar.classList.add('btn-secondary');
+    if(fileName.length!=0) updateChart(null,null);
+});
 
 async function updateChart(type, choose_name){
 
@@ -278,7 +300,10 @@ async function updateChart(type, choose_name){
           }]
         },
         options: {
-          maintainAspectRatio: false,
+            responsive: true, // 그래프 크기 자동 조정
+            aspectRatio: 2, // 캔버스 가로/세로 비율
+            maintainAspectRatio: false, // 캔버스 비율 유지 해제
+            devicePixelRatio: 3, // 픽셀 밀도 설정
           scales: {
             y: {
               beginAtZero: true

@@ -64,7 +64,7 @@ router.get('/data/:tableName', async (req,res)=>{
         // 테이블의 모든 데이터를 가져와서, datas에 저장함
         const datas = await profile_model.findAll();
         
-        // task 기준 core처리 현황을 불러옴(
+        // task 기준 core처리 현황을 불러옴
         const tasks = await profile_model.findAll({
             attributes: [sequelize.fn('DISTINCT', sequelize.col('core')), 'core'],
         });
