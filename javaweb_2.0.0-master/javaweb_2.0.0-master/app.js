@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const pdf = require('html-pdf');
 const path = require('path');
+const fs = require('fs');
 const nunjucks = require('nunjucks');
 const { sequelize } = require('./models');
 const indexRouter = require('./routes');
@@ -9,11 +10,12 @@ const profilesRouter = require('./routes/profiles');
 
 const app = express();
 
-app.set('port', process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
+app.set('port', PORT);
 app.set('view engine', 'html');
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -34,27 +36,52 @@ app.use('/', indexRouter);
 app.use('/profiles', profilesRouter);
 
 app.post('/export', (req, res) => {
-    const { title, content } = req.body;
+    const { title, content, chartType, chartImage } = req.body;
 
     const htmlTemplate = `
         <html>
         <head>
             <title>${title}</title>
-            <link rel="stylesheet" type="text/css" href="styles.css">
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { color: #333; }
+                p { color: #666; }
+                img { max-width: 100%; height: auto; }
+                .content { margin-bottom: 20px; }
+            </style>
         </head>
         <body>
-            <h1>${title}</h1>
-            <p>${content}</p>
+            <div class="content">
+                <h1>${title}</h1>
+                <p>${content}</p>
+            </div>
+            <div class="content">
+                <img src="${chartImage}" alt="Chart Image">
+            </div>
         </body>
         </html>
     `;
 
-    pdf.create(htmlTemplate).toBuffer((err, buffer) => {
+    const options = { format: 'A4' };
+
+    pdf.create(htmlTemplate, options).toFile('./report.pdf', (err, result) => {
         if (err) {
             console.error('PDF 생성에 실패했습니다.', err);
-            res.status(500).send('PDF 생성에 실패했습니다.');
+            return res.status(500).send('PDF 생성에 실패했습니다.');
         } else {
-            res.status(200).json({ fileUrl: 'data:application/pdf;base64,' + buffer.toString('base64') });
+            res.download(result.filename, 'report.pdf', (err) => {
+                if (err) {
+                    console.error('파일 다운로드에 실패했습니다.', err);
+                    res.status(500).send('파일 다운로드에 실패했습니다.');
+                } else {
+                    // 파일 다운로드 후 서버에서 삭제
+                    fs.unlink(result.filename, (err) => {
+                        if (err) {
+                            console.error('파일 삭제에 실패했습니다.', err);
+                        }
+                    });
+                }
+            });
         }
     });
 });
@@ -71,6 +98,6 @@ app.use((err, req, res, next) => {
     res.render('error');
 });
 
-app.listen(app.get('port'), () => {
-    console.log("http://localhost:" + app.get('port') + " server open");
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
